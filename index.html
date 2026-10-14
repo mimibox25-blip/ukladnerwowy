@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test z Układu Nerwowego - Egzamin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .option-btn {
+      transition: all 0.2s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-indigo-400">🧠 Test: Układ Nerwowy</h1>
+      <div id="stats" class="text-sm font-medium bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-600">
+        Pytanie: <span id="current-q" class="text-indigo-300">1</span>/50 | Wynik: <span id="score" class="text-emerald-400">0</span>
+      </div>
+    </div>
+    <!-- Progress Bar -->
+    <div class="w-full bg-slate-700 h-1.5">
+      <div id="progress-bar" class="bg-indigo-500 h-1.5 w-0 transition-all duration-300"></div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-3xl mx-auto px-4 py-8 w-full flex-grow">
+    
+    <!-- Quiz Card -->
+    <div id="quiz-container" class="bg-slate-800 rounded-2xl p-6 md:p-8 shadow-xl border border-slate-700">
+      
+      <div class="flex justify-between items-center mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <span id="category-tag" class="bg-slate-700 px-2.5 py-1 rounded text-indigo-300">Anatomia & Fizjologia</span>
+        <span id="question-number-badge">Pytanie 1 z 50</span>
+      </div>
+
+      <!-- Question Text -->
+      <h2 id="question-text" class="text-lg md:text-xl font-semibold mb-6 text-slate-100 leading-relaxed">
+        Ładowanie pytania...
+      </h2>
+
+      <!-- Options -->
+      <div id="options-container" class="space-y-3 mb-6">
+        <!-- Generated dynamically -->
+      </div>
+
+      <!-- Explanation Box (Hidden by default) -->
+      <div id="explanation-box" class="hidden p-4 rounded-xl border mb-6 transition-all duration-200">
+        <div id="explanation-status" class="font-bold text-base mb-1"></div>
+        <div id="explanation-text" class="text-sm text-slate-300 leading-normal"></div>
+      </div>
+
+      <!-- Next Button -->
+      <div class="flex justify-end">
+        <button id="next-btn" onclick="nextQuestion()" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2">
+          Następne pytanie ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Screen (Hidden by default) -->
+    <div id="results-container" class="hidden bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-700 text-center">
+      <div class="text-5xl mb-4">🎉</div>
+      <h2 class="text-2xl font-bold mb-2 text-white">Koniec Testu!</h2>
+      <p class="text-slate-400 mb-6">Oto Twój wynik końcowy:</p>
+      
+      <div class="text-4xl font-extrabold text-indigo-400 mb-2">
+        <span id="final-score">0</span> / 50
+      </div>
+      <p id="final-percentage" class="text-slate-300 font-medium mb-8">0%</p>
+
+      <button onclick="restartQuiz()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all">
+        Rozpocznij od nowa
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800">
+    Materiały do nauki na egzamin z układu nerwowego
+  </footer>
+
+  <script>
+    const questions = [
+      {
+        question: "Które z poniższych zadań NIE należy do podstawowych funkcji układu nerwowego?",
+        options: [
+          "Produkcja komórek krwi w szpiku kostnym",
+          "Odbiór bodźców ze środowiska",
+          "Przetwarzanie informacji i reakcja organizmu",
+          "Utrzymanie homeostazy oraz obsługa wyższych funkcji psychicznych"
+        ],
+        correct: 0,
+        explanation: "Układ nerwowy odpowiada za odbiór bodźców, przetwarzanie informacji, reakcję, homeostazę i funkcje psychiczne. Produkcja krwinek to funkcja układu krwionośnego/kostnego."
+      },
+      {
+        question: "Jak dzielimy układ nerwowy ze względu na topografię (budowę)?",
+        options: [
+          "Ośrodkowy i obwodowy",
+          "Somatyczny i autonomiczny",
+          "Współczulny i przywspółczulny",
+          "Mózgowy i rdzeniowy"
+        ],
+        correct: 0,
+        explanation: "Ze względu na topografię (budowę anatomii) układ nerwowy dzielimy na Ośrodkowy Układ Nerwowy (OUN) oraz Obwodowy Układ Nerwowy (OUN)."
+      },
+      {
+        question: "Które struktury wchodzą w skład Ośrodkowego Układu Nerwowego (OUN)?",
+        options: [
+          "Mózg, móżdżek, pień mózgu i rdzeń kręgowy",
+          "Nerwy czaszkowe, nerwy rdzeniowe, zwoje i sploty",
+          "Układ współczulny i przywspółczulny",
+          "Receptor, efektor oraz nerwy obwodowe"
+        ],
+        correct: 0,
+        explanation: "Ośrodkowy układ nerwowy (centrum kontroli) składa się z mózgowia (mózg, móżdżek, pień mózgu) oraz rdzenia kręgowego."
+      },
+      {
+        question: "Co zaliczamy do Obwodowego Układu Nerwowego?",
+        options: [
+          "Nerwy czaszkowe, nerwy rdzeniowe, zwoje, sploty i zakończenia nerwowe",
+          "Mózg i rdzeń kręgowy",
+          "Wyłącznie neurony pośredniczące",
+          "Korę mózgową i istotę białą"
+        ],
+        correct: 0,
+        explanation: "Obwodowy układ nerwowy obejmuje nerwy czaszkowe (12 par), nerwy rdzeniowe (31 par), zwoje nerwowe, sploty oraz zakończenia nerwowe."
+      },
+      {
+        question: "Jaki podział układu nerwowego bazuje na kryterium czynnościowym?",
+        options: [
+          "Somatyczny i autonomiczny",
+          "Ośrodkowy i obwodowy",
+          "Mózgowy i pniowy",
+          "Elektryczny i chemiczny"
+        ],
+        correct: 0,
+        explanation: "Podział ze względu na czynności to podział na układ somatyczny (zależny od woli) i autonomiczny (niezależny od woli)."
+      },
+      {
+        question: "Za co odpowiada układ somatyczny?",
+        options: [
+          "Za kontakt ze środowiskiem zewnętrznym oraz kontrolę mięśni zależnych od woli",
+          "Za automatyczną regulację narządów wewnętrznych bez udziału świadomości",
+          "Wyłącznie za odruchy bezwarunkowe",
+          "Za spowalnianie akcji serca i trawienie"
+        ],
+        correct: 0,
+        explanation: "Układ somatyczny umożliwia kontakt ze środowiskiem zewnętrznym, odbiera bodźce ze zmysłów i steruje mięśniami zależnymi od naszej woli."
+      },
+      {
+        question: "Jaka jest główna cecha układu autonomicznego?",
+        options: [
+          "Reguluje pracę narządów wewnętrznych i gruczołów, działając bez świadomego udziału",
+          "Działa wyłącznie z pełnym udziałem świadomości",
+          "Składa się tylko z nerwu węchowego i wzrokowego",
+          "Odpowiada wyłącznie za skurcze mięśni szkieletowych"
+        ],
+        correct: 0,
+        explanation: "Układ autonomiczny (wegetatywny) dba o homeostazę i pracę narządów wewnętrznych/gruczołów w sposób automatyczny, bez udziału woli."
+      },
+      {
+        question: "Na jakie podsystemy dzieli się układ autonomiczny?",
+        options: [
+          "Współczulny, przywspółczulny i jelitowy",
+          "Somatyczny, obwodowy i centralny",
+          "Czuciowy, ruchowy i mieszany",
+          "Mózgowy, rdzeniowy i pniowy"
+        ],
+        correct: 0,
+        explanation: "Układ autonomiczny dzieli się na układ współczulny, przywspółczulny oraz układ jelitowy."
+      },
+      {
+        question: "Jaką funkcję pełni układ współczulny (sympatyczny)?",
+        options: [
+          "Mobilizuje organizm w sytuacjach stresowych, zagrożenia lub wysiłku (przyspiesza działanie)",
+          "Odpowiada za wypoczynek, regenerację i oszczędzanie energii",
+          "Koordynuje tylko perystaltykę jelit",
+          "Wyłącza działanie układu nerwowego"
+        ],
+        correct: 0,
+        explanation: "Układ współczulny działa mobilizująco („walka lub ucieczka”) w warunkach stresu, zagrożenia lub dużego wysiłku fizycznego."
+      },
+      {
+        question: "Za co odpowiada układ przywspółczulny (parasympatyczny)?",
+        options: [
+          "Odpowiada za wypoczynek, regenerację i oszczędzanie energii (spowalnia działanie)",
+          "Mobilizuje organizm do natychmiastowej ucieczki",
+          "Zwiększa poziom adrenaliny we krwi",
+          "Kontroluje skurcze mięśni mimicznych twarzy"
+        ],
+        correct: 0,
+        explanation: "Układ przywspółczulny odpowiada za stany relaksu, odpoczynku, regenerację organizmu i trawienie pokarmu."
+      },
+      {
+        question: "Jaką rolę pełni układ jelitowy?",
+        options: [
+          "Koordynuje perystaltykę jelit i wydzielanie enzymów trawiennych",
+          "Odpowiada za odruchy obronne oka",
+          "Reguluje pracę serca podczas wysiłku",
+          "Odbiera wrażenia słuchowe z otoczenia"
+        ],
+        correct: 0,
+        explanation: "Układ jelitowy bezpośrednio zarządza pracą przewodu pokarmowego – wymusza perystaltykę jelit oraz stymuluje wydzielanie enzymów."
+      },
+      {
+        question: "Czym jest neuron według materiałów?",
+        options: [
+          "Komórką nerwową odbierającą, przetwarzającą i przekazującą informacje",
+          "Pęczkiem włókien nerwowych poza OUN",
+          "Miejscem połączenia dwóch mięśni",
+          "Naczyniem krwionośnym zasilającym mózg"
+        ],
+        correct: 0,
+        explanation: "Neuron to podstawowa jednostka strukturalna i funkcjonalna układu nerwowego, zdolna do odbierania i przekazywania sygnałów."
+      },
+      {
+        question: "Co zawiera ciało komórki neuronu (perykarion)?",
+        options: [
+          "Jądro komórkowe oraz organelle",
+          "Wyłącznie osłonkę mielinową",
+          "Szczelinę synaptyczną",
+          "Pęczki włókien czuciowych"
+        ],
+        correct: 0,
+        explanation: "Ciało komórki (perykarion) mieści w sobie jądro komórkowe oraz organelle komórkowe niezbędne do metabolizmu neuronu."
+      },
+      {
+        question: "Jaką funkcję pełnią dendryty?",
+        options: [
+          "Są licznymi krótkimi wypustkami odbierającymi sygnały z innych neuronów",
+          "Są długimi wypustkami przewodzącymi sygnał od ciała komórki",
+          "Tworzą osłonkę tłuszczową wokół aksonu",
+          "Wydzielają hormony do krwi"
+        ],
+        correct: 0,
+        explanation: "Dendryty to liczne, krótkie wypustki, które zbierają impulsy od innych neuronów i kierują je w stronę ciała komórki."
+      },
+      {
+        question: "Czym jest akson?",
+        options: [
+          "Długą, pojedynczą wypustką przewodzącą impuls nerwowy od ciała komórki",
+          "Krótką wypustką odbierającą sygnały",
+          "Jądrem komórkowym neuronu",
+          "Zbiorem komórek glejowych"
+        ],
+        correct: 0,
+        explanation: "Akson to pojedyncza, długa wypustka, która przewodzi impuls elektryczny OD ciała komórki w stronę kolejnych komórek."
+      },
+      {
+        question: "Jak w notatkach zdefiniowano nerw?",
+        options: [
+          "Pęczek włókien nerwowych (aksonów/dendrytów) znajdujących się poza OUN",
+          "Pojedynczą komórkę nerwową w mózgowiu",
+          "Skupisko ciał komórek w rdzeniu kręgowym",
+          "Połączenie synaptyczne w móżdżku"
+        ],
+        correct: 0,
+        explanation: "Nerw to struktura obwodowego układu nerwowego złożona z pęczka włókien nerwowych otoczonych tkanką łączną."
+      },
+      {
+        question: "Które substancje wymieniono w notatkach jako neuroprzekaźniki?",
+        options: [
+          "Dopamina, serotonina, acetylocholina",
+          "Insulina, glukagon, tyroksyna",
+          "Sód, potas, wapń",
+          "Hemoglobina, mioglobina, włóknik"
+        ],
+        correct: 0,
+        explanation: "Przykłady neuroprzekaźników podane w notatkach na końcu aksonu to dopamina, serotonina oraz acetylocholina."
+      },
+      {
+        question: "Czym jest synapsa?",
+        options: [
+          "Miejscem styku neuronu z kolejną komórką",
+          "Osłonką izolującą włókno nerwowe",
+          "Główną magistralą komunikacyjną",
+          "Płynem mózgowo-rdzeniowym"
+        ],
+        correct: 0,
+        explanation: "Synapsa to specjalne miejsce połączenia i komunikacji między zakończeniem aksonu a dendrytem innego neuronu lub komórką wykonawczą."
+      },
+      {
+        question: "Jak działa przekazywanie sygnału w synapsie chemicznej?",
+        options: [
+          "Neuroprzekaźniki są uwalniane z aksonu, pokonują szczelinę synaptyczną i działają na kolejny neuron",
+          "Impuls przeskakuje fizycznie po osłonce mielinowej",
+          "Prąd elektryczny płynie bezpośrednio przez ciągłe błony komórkowe",
+          "Sygnał transportowany jest przez naczynia limfatyczne"
+        ],
+        correct: 0,
+        explanation: "Impuls dociera do końca aksonu, powoduje uwalnianie neuroprzekaźników do szczeliny synaptycznej, które pobudzają lub hamują następny neuron."
+      },
+      {
+        question: "Co charakteryzuje dojrzałe neurony?",
+        options: [
+          "Są pobudliwe i przewodzą impulsy, ale nie mają zdolności do podziałów komórkowych",
+          "Dzielą się intensywnie przez całe życie człowieka",
+          "Nie potrafią przewodzić impulsów elektrycznych",
+          "Mogą przekształcić się w komórki kostne"
+        ],
+        correct: 0,
+        explanation: "Dojrzałe neurony tracą zdolność do podziałów komórkowych (mitozy), zachowując przy tym unikalne cechy pobudliwości i przewodnictwa."
+      },
+      {
+        question: "Czym jest potencjał czynnościowy?",
+        options: [
+          "Gwałtowną, chwilową zmianą napięcia elektrycznego na błonie neuronu służącą do przesyłania impulsu",
+          "Stałym ujemnym ładunkiem wewnątrz komórki",
+          "Procesem regeneracji osłonki mielinowej",
+          "Całkowitym zanikiem napięcia na błonie"
+        ],
+        correct: 0,
+        explanation: "Potencjał czynnościowy to krótka, szybka zmiana potencjału błonowego, która rozprzestrzenia się wzdłuż aksonu jako impuls nerwowy."
+      },
+      {
+        question: "Co charakteryzuje stan spoczynku (polaryzację) neuronu?",
+        options: [
+          "Wnętrze neuronu jest naładowane ujemnie względem otoczenia",
+          "Wnętrze neuronu jest naładowane dodatnio względem otoczenia",
+          "Jony sodu i potasu są w idealnej równowadze ilościowej",
+          "Błona jest całkowicie przepuszczalna dla wszystkich białek"
+        ],
+        correct: 0,
+        explanation: "W stanie spoczynku (polaryzacji) wnętrze neuronu wykazuje ładunek ujemny w stosunku do płynu zewnątrzkomórkowego."
+      },
+      {
+        question: "Co zachodzi podczas depolaryzacji błony neuronu?",
+        options: [
+          "Masowy napływ jonów sodu (Na+) do wnętrza komórki, co zmienia ładunek wnętrza na dodatni",
+          "Masowy wypływ jonów potasu na zewnątrz komórki",
+          "Ucieczka jonów chlorkowych z wnętrza",
+          "Spadek napięcia elektrycznego poniżej wartości spoczynkowej"
+        ],
+        correct: 0,
+        explanation: "Gdy bodziec przekroczy próg pobudliwości, otwierają się kanały sodowe – jony $Na^+$ wnikają do środka, wzbudzając dodatni potencjał."
+      },
+      {
+        question: "Na czym polega repolaryzacja?",
+        options: [
+          "Jony potasu (K+) masowo wyciekają na zewnątrz, przywracając ujemny ładunek wewnątrz",
+          "Jony sodu wnikają w jeszcze większej ilości do neuronu",
+          "Kora mózgowa przetwarza otrzymany impuls",
+          "Powstaje nowa synapsa chemiczna"
+        ],
+        correct: 0,
+        explanation: "Podczas repolaryzacji jony $K^+$ wypływają z komórki, co powoduje szybki spadek napięcia i powrót ujemnego ładunku wewnątrz neuronu."
+      },
+      {
+        question: "Jaka jest prawidłowa kolejność etapów potencjału czynnościowego?",
+        options: [
+          "Polaryzacja (spoczynek) ➔ Depolaryzacja ➔ Repolaryzacja ➔ Hiperpolaryzacja i odbudowa",
+          "Depolaryzacja ➔ Polaryzacja ➔ Repolaryzacja",
+          "Repolaryzacja ➔ Depolaryzacja ➔ Polaryzacja",
+          "Hiperpolaryzacja ➔ Depolaryzacja ➔ Polaryzacja"
+        ],
+        correct: 0,
+        explanation: "Przebieg potencjału: najpierw stan spoczynku (polaryzacja), potem narastanie impulsu (depolaryzacja), powrót do ujemnego ładunku (repolaryzacja) i odbudowa stanu spoczynkowego."
+      },
+      {
+        question: "Ile par nerwów czaszkowych wychodzi z mózgowia?",
+        options: [
+          "12 par",
+          "31 par",
+          "8 par",
+          "24 pary"
+        ],
+        correct: 0,
+        explanation: "Człowiek posiada 12 par nerwów czaszkowych, oznaczanych cyframi rzymskimi (I - XII)."
+      },
+      {
+        question: "Jaką funkcję pełni nerw węchowy (I)?",
+        options: [
+          "Zmysł powonienia (jest jednym z niewielu nerwów zdolnych do regeneracji)",
+          "Widzenie ostrości i pola widzenia",
+          "Ruchy gałki ocznej i zwężanie źrenic",
+          "Czucie na powierzchni twarzy"
+        ],
+        correct: 0,
+        explanation: "Nerw I (węchowy) to nerw czuciowy odpowiedzialny za węch. Posiada rzadką u neuronów zdolność do regeneracji."
+      },
+      {
+        question: "Do jakiej kategorii należy nerw wzrokowy (II)?",
+        options: [
+          "Czuciowy (przenosi informacje wizualne z siatkówki do mózgu)",
+          "Ruchowy (porusza gałką oczną)",
+          "Mieszany (czuciowo-ruchowy)",
+          "Autonomiczny jelitowy"
+        ],
+        correct: 0,
+        explanation: "Nerw II (wzrokowy) jest nerwem czuciowym przewożącym bodźce świetlne z siatkówki do kory wzrokowej."
+      },
+      {
+        question: "Który nerw czaszkowy odpowiada za większość ruchów oka i zwężenie źrenicy?",
+        options: [
+          "Nerw okoruchowy (III)",
+          "Nerw bloczkowy (IV)",
+          "Nerw odwodzący (VI)",
+          "Nerw trójdzielny (V)"
+        ],
+        correct: 0,
+        explanation: "Nerw III (okoruchowy) to nerw mieszany kontrolujący większość mięśni oka oraz zwężanie źrenicy."
+      },
+      {
+        question: "Jaki mięsień oka unerwia nerw bloczkowy (IV)?",
+        options: [
+          "Mięsień skośny górny oka",
+          "Mięsień prosty boczny oka",
+          "Mięsień dźwigacz powieki",
+          "Mięsień rzęskowy"
+        ],
+        correct: 0,
+        explanation: "Nerw IV (bloczkowy) jest nerwem ruchowym unerwiającym mięsień skośny górny oka."
+      },
+      {
+        question: "Za co odpowiada nerw trójdzielny (V)?",
+        options: [
+          "Czucie twarzy, zębów, zatok oraz akt żucia",
+          "Smak z przednich części języka",
+          "Ruchy szyi i barków",
+          "Słuch oraz utrzymanie równowagi"
+        ],
+        correct: 0,
+        explanation: "Nerw V (trójdzielny) jest dużym nerwem mieszanym – daje czucie na twarzy, w zębach i zatokach oraz kieruje mięśniami żucia."
+      },
+      {
+        question: "Ruch oka w kierunku zewnętrznym (na zewnątrz) jest kontrolowany przez:",
+        options: [
+          "Nerw odwodzący (VI)",
+          "Nerw wzrokowy (II)",
+          "Nerw okoruchowy (III)",
+          "Nerw twarzowy (VII)"
+        ],
+        correct: 0,
+        explanation: "Nerw VI (odwodzący) unerwia mięsień prosty boczny oka, który odpowiada za odwodzenie oka (ruch na zewnątrz)."
+      },
+      {
+        question: "Za mimikę twarzy oraz smak z przednich 2/3 języka odpowiada:",
+        options: [
+          "Nerw twarzowy (VII)",
+          "Nerw trójdzielny (V)",
+          "Nerw językowo-gardłowy (IX)",
+          "Nerw podjęzykowy (XII)"
+        ],
+        correct: 0,
+        explanation: "Nerw VII (twarzowy) kieruje mięśniami mimicznymi twarzy, pobudza wydzielanie śliny oraz odbiera smak z przednich $2/3$ języka."
+      },
+      {
+        question: "Nerw przedsionkowo-ślimakowy (VIII) przekazuje informacje dotyczące:",
+        options: [
+          "Słuchu i równowagi z ucha wewnętrznego",
+          "Wzroku i głębi pola",
+          "Mowy oraz ruchu gardła",
+          "Pocenia się na powierzchni głowy"
+        ],
+        correct: 0,
+        explanation: "Nerw VIII (przedsionkowo-ślimakowy) to czuciowy nerw odpowiadający za zmysł słuchu oraz zmysł równowagi."
+      },
+      {
+        question: "Który nerw czaszkowy odpowiada za połykanie i smak z tylnej części języka?",
+        options: [
+          "Nerw językowo-gardłowy (IX)",
+          "Nerw podjęzykowy (XII)",
+          "Nerw dodatkowy (XI)",
+          "Nerw trójdzielny (V)"
+        ],
+        correct: 0,
+        explanation: "Nerw IX (językowo-gardłowy) bierze udział w odruchu połykania oraz odbiera wrażenia smakowe z pozostałej części języka i gardła."
+      },
+      {
+        question: "Czym charakteryzuje się nerw błędny (X)?",
+        options: [
+          "Odpowiada za pracę serca, perystaltykę, pocenie się i ruchy krtani",
+          "Kontroluje jedynie ruchy gałek ocznych",
+          "Jest nerwem czysto czuciowym dla narządu słuchu",
+          "Unerwia wyłącznie skórę na głowie"
+        ],
+        correct: 0,
+        explanation: "Nerw X (błędny) to najdłuższy nerw autonomiczny – zarządza tętnem, perystaltyką narządów klatki piersiowej i brzucha oraz mową/krtanią."
+      },
+      {
+        question: "Nerw dodatkowy (XI) odpowiada za ruchy:",
+        options: [
+          "Głowy, szyi, barku i mięśnia mostkowo-obojczykowo-sutkowego",
+          "Języka podczas żucia",
+          "Gałek ocznych we wszystkich kierunkach",
+          "Przełyku i żołądka"
+        ],
+        correct: 0,
+        explanation: "Nerw XI (dodatkowy) ruchowo kontroluje wybrane mięśnie szyi i barku (np. mięsień czworoboczny i mostkowo-obojczykowo-sutkowy)."
+      },
+      {
+        question: "Nerw podjęzykowy (XII) jest nerwem ruchowym kontrolującym:",
+        options: [
+          "Ruchy języka podczas mowy i połykania",
+          "Wydzielanie śliny przez ślinianki",
+          "Ruchy żuchwy i zgryz",
+          "Czucie bólu w gardle"
+        ],
+        correct: 0,
+        explanation: "Nerw XII (podjęzykowy) zawiaduje ruchami języka niezbędnymi do artykulacji mowy, połykania i manipulowania jedzeniem."
+      },
+      {
+        question: "Który zestaw schorzeń wymieniono w notatkach w sekcji 'Patologie układu nerwowego'?",
+        options: [
+          "Padaczka, rwa kulszowa, udar, choroba Parkinsona, choroba Alzheimera",
+          "Cukrzyca, miażdżyca, nadciśnienie, anemia",
+          "Ostra niewydolność nerek, kamica, wrzody",
+          "Zaćma, jaskra, zapalenie ucha środkowego"
+        ],
+        correct: 0,
+        explanation: "W sekcji 4 notatek wymieniono: padaczkę, rwę kulszową, udar niedokrwienny, zapalenie opon mózgowych, mózgowe porażenie dziecięce, neuropatię obwodową, Parkinson i Alzheimer."
+      },
+      {
+        question: "Na jakie płaty dzieli się półkula mózgu według notatek?",
+        options: [
+          "Czołowy, ciemieniowy, skroniowy, potyliczny",
+          "Przedni, tylny, boczny, dolny",
+          "Brzuszny, grzbietowy, środkowy, pniowy",
+          "Ruchowy, czuciowy, wzrokowy, słuchowy"
+        ],
+        correct: 0,
+        explanation: "Każda półkula mózgu dzieli się na cztery główne płaty: czołowy, ciemieniowy, skroniowy oraz potyliczny."
+      },
+      {
+        question: "Główną funkcją móżdżku jest:",
+        options: [
+          "Koordynacja ruchowa, równowaga, precyzja i napięcie mięśniowe",
+          "Kontrola oddychania i ciśnienia krwi",
+          "Odbiór bodźców zapachowych",
+          "Przetwarzanie strachu i lęku"
+        ],
+        correct: 0,
+        explanation: "Móżdżek odpowiada za płynność ruchów, koordynację ruchową, utrzymanie równowagi ciała oraz regulację napięcia mięśniowego."
+      },
+      {
+        question: "Jakie kluczowe funkcje życiowe kontroluje pień mózgu?",
+        options: [
+          "Oddech, rytm serca, ciśnienie krwi, połykanie",
+          "Uczenie się i pamięć długotrwałą",
+          "Świadome planowanie ruchów dłoni",
+          "Rozpoznawanie twarzy i kolorów"
+        ],
+        correct: 0,
+        explanation: "Pień mózgu to ośrodek kluczowych funkcji wegetatywnych: pracy serca, oddychania, regulacji ciśnienia krwi i połykania."
+      },
+      {
+        question: "Co w notatkach określono mianem 'Autostrady nerwowej'?",
+        options: [
+          "Rdzeń kręgowy",
+          "Pień mózgu",
+          "Nerw wzrokowy",
+          "Splot szyjny"
+        ],
+        correct: 0,
+        explanation: "Punkt 8 w notatkach nazywa rdzeń kręgowy 'autostradą nerwową', ponieważ stanowi główną magistralę komunikacyjną łączącą mózgowie z resztą ciała."
+      },
+      {
+        question: "Jak zdefiniowano pamięć w materiałach?",
+        options: [
+          "Zdolność układu nerwowego do kodowania, przechowywania i odtwarzania informacji oraz doświadczeń",
+          "Reakcja odruchowa bez udziału rdzenia kręgowego",
+          "Przewodzenie jonów sodu wzdłuż błony neuronu",
+          "Tworzenie nowych komórek w móżdżku"
+        ],
+        correct: 0,
+        explanation: "Pamięć to zdolność układu nerwowego do 3 etapów: kodowania, przechowywania oraz późniejszego odtwarzania informacji i doświadczeń."
+      },
+      {
+        question: "Czym jest neuroplastyczność?",
+        options: [
+          "Zdolnością mózgu i układu nerwowego do zmieniania się pod wpływem doświadczeń, nauki i treningu",
+          "Sztywnością połączeń nerwowych u dorosłych",
+          "Procesem niszczenia aksonów w chorobie Alzheimera",
+          "Szybkością przepływu prądu elektrycznego przez synapsę"
+        ],
+        correct: 0,
+        explanation: "Neuroplastyczność to cecha pozwalająca na tworzenie nowych połączeń neuronowych oraz wzmacnianie lub osłabianie istniejących pod wpływem nauki."
+      },
+      {
+        question: "Jaką rolę pełni ciało migdałowate?",
+        options: [
+          "Pomaga w rozpoznawaniu zagrożeń, przetwarzaniu strachu oraz tworzeniu wspomnień emocjonalnych",
+          "Steruje perystaltyką jelita grubego",
+          "Odbiera fale dźwiękowe z ucha",
+          "Odpowiada za precyzję ruchów ręki"
+        ],
+        correct: 0,
+        explanation: "Ciało migdałowate to niewielka struktura mózgu odpowiedzialna za generowanie emocji (szczególnie strachu), rozpoznawanie zagrożeń i pamięć emocjonalną."
+      },
+      {
+        question: "Czym jest ból fantomowy?",
+        options: [
+          "Bólem odczuwanym w części ciała, której pacjent już nie posiada (np. po amputacji)",
+          "Bólem głowy wynikającym ze stresu",
+          "Bólem klatki piersiowej w chorobie Parkinsona",
+          "Brak odczuwania bólu przy uszkodzeniu rdzenia"
+        ],
+        correct: 0,
+        explanation: "Ból fantomowy polega na odczuwaniu dolegliwości bólowych w odciętej lub nieobecnej kończynie/części ciała."
+      },
+      {
+        question: "Co oznacza pojęcie 'koński ogon' w anatomii?",
+        options: [
+          "Skupisko korzeni nerwowych w kanale kręgowym poniżej zakończenia rdzenia kręgowego",
+          "Zakończenie aksonu w synapsie",
+          "Dolną część pnia mózgu",
+          "Splot nerwów wzrokowych"
+        ],
+        correct: 0,
+        explanation: "Koński ogon to wiązka korzeni nerwów rdzeniowych leżąca w kanale kręgowym poniżej miejsca, gdzie kończy się rdzeń kręgowy."
+      },
+      {
+        question: "Ile par nerwów rdzeniowych wyróżnia się w anatomii?",
+        options: [
+          "31 par (8 szyjnych, 12 piersiowych, 5 lędźwiowych, 5 krzyżowych, 1 guziczna)",
+          "12 par",
+          "20 par",
+          "40 par"
+        ],
+        correct: 0,
+        explanation: "Człowiek posiada 31 par nerwów rdzeniowych: 8 szyjnych, 12 piersiowych, 5 lędźwiowych, 5 krzyżowych i 1 guziczną."
+      },
+      {
+        question: "Na jakiej wysokości kręgosłupa zazwyczaj kończy się rdzeń kręgowy?",
+        options: [
+          "Na wysokości 1 lub 2 kręgu lędźwiowego",
+          "Na wysokości kości guzicznej",
+          "Na wysokości 7 kręgu szyjnego",
+          "W połowie odcinka piersiowego"
+        ],
+        correct: 0,
+        explanation: "Rdzeń kręgowy dorosłego człowieka kończy się stożkiem rdzeniowym na wysokości 1. lub 2. kręgu lędźwiowego ($L_1/L_2$)."
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let shuffledQuestions = [];
+    let currentShuffledOptions = [];
+    let answered = false;
+
+    // Shuffle Array Utility
+    function shuffle(array) {
+      let currentIndex = array.length, randomIndex;
+      const newArray = [...array];
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]];
+      }
+      return newArray;
+    }
+
+    function initQuiz() {
+      shuffledQuestions = shuffle(questions);
+      currentQuestionIndex = 0;
+      score = 0;
+      document.getElementById('results-container').classList.add('hidden');
+      document.getElementById('quiz-container').classList.remove('hidden');
+      updateStats();
+      loadQuestion();
+    }
+
+    function updateStats() {
+      document.getElementById('current-q').innerText = currentQuestionIndex + 1;
+      document.getElementById('score').innerText = score;
+      document.getElementById('question-number-badge').innerText = `Pytanie ${currentQuestionIndex + 1} z ${shuffledQuestions.length}`;
+      const progressPercent = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+      document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+    }
+
+    function loadQuestion() {
+      answered = false;
+      const q = shuffledQuestions[currentQuestionIndex];
+      
+      document.getElementById('question-text').innerText = q.question;
+      document.getElementById('explanation-box').classList.add('hidden');
+      document.getElementById('next-btn').classList.add('hidden');
+
+      // Create shuffled options mapping
+      const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+      currentShuffledOptions = shuffle(optionsWithIndex);
+
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      currentShuffledOptions.forEach((optionObj, displayIndex) => {
+        const btn = document.createElement('button');
+        btn.className = "option-btn w-full text-left p-4 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600/80 text-slate-200 font-medium text-sm md:text-base flex items-center justify-between";
+        btn.innerHTML = `<span>${optionObj.text}</span> <span class="text-xs bg-slate-800 border border-slate-600 px-2 py-1 rounded text-slate-400">${String.fromCharCode(65 + displayIndex)}</span>`;
+        btn.onclick = () => selectOption(displayIndex, optionObj.originalIndex);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectOption(selectedIndex, originalIndex) {
+      if (answered) return;
+      answered = true;
+
+      const q = shuffledQuestions[currentQuestionIndex];
+      const isCorrect = (originalIndex === q.correct);
+      const optionButtons = document.querySelectorAll('.option-btn');
+
+      if (isCorrect) {
+        score++;
+        document.getElementById('score').innerText = score;
+      }
+
+      // Highlight options
+      currentShuffledOptions.forEach((opt, idx) => {
+        const btn = optionButtons[idx];
+        btn.disabled = true;
+        btn.classList.remove('hover:bg-slate-700');
+
+        if (opt.originalIndex === q.correct) {
+          btn.classList.add('bg-emerald-950', 'border-emerald-500', 'text-emerald-200');
+          btn.innerHTML += ' <span class="text-emerald-400 text-lg">✓</span>';
+        } else if (idx === selectedIndex && !isCorrect) {
+          btn.classList.add('bg-rose-950', 'border-rose-500', 'text-rose-200');
+          btn.innerHTML += ' <span class="text-rose-400 text-lg">✗</span>';
+        } else {
+          btn.classList.add('opacity-50');
+        }
+      });
+
+      // Show Explanation
+      const expBox = document.getElementById('explanation-box');
+      const expStatus = document.getElementById('explanation-status');
+      const expText = document.getElementById('explanation-text');
+
+      expBox.classList.remove('hidden');
+      if (isCorrect) {
+        expBox.className = "p-4 rounded-xl border mb-6 bg-emerald-950/40 border-emerald-600/50";
+        expStatus.className = "font-bold text-emerald-400 mb-1 flex items-center gap-2";
+        expStatus.innerHTML = "<span>Poprawna odpowiedź!</span>";
+      } else {
+        expBox.className = "p-4 rounded-xl border mb-6 bg-rose-950/40 border-rose-600/50";
+        expStatus.className = "font-bold text-rose-400 mb-1 flex items-center gap-2";
+        expStatus.innerHTML = "<span>Niepoprawna odpowiedź</span>";
+      }
+
+      expText.innerText = q.explanation;
+      document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < shuffledQuestions.length) {
+        updateStats();
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('quiz-container').classList.add('hidden');
+      document.getElementById('results-container').classList.remove('hidden');
+      document.getElementById('progress-bar').style.width = '100%';
+      
+      document.getElementById('final-score').innerText = score;
+      const percentage = Math.round((score / shuffledQuestions.length) * 100);
+      document.getElementById('final-percentage').innerText = `Wynik procentowy: ${percentage}%`;
+    }
+
+    function restartQuiz() {
+      initQuiz();
+    }
+
+    // Start on load
+    window.onload = initQuiz;
+  </script>
+</body>
+</html>
